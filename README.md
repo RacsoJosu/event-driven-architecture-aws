@@ -1,58 +1,209 @@
 
-# Welcome to your CDK Python project!
+# 🏗️ Arquitectura Basada en Eventos (EDA) con AWS CDK
 
-This is a blank project for CDK development with Python.
+Este proyecto es una **aplicación serverless de aprendizaje** que implementa una **arquitectura basada en eventos (EDA)** sobre **AWS** utilizando **CDK (Cloud Development Kit)** en **Python**.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+El objetivo es aprender a diseñar, desplegar y conectar múltiples microservicios mediante **eventos asíncronos** usando servicios como **Amazon EventBridge**, **AWS Lambda**, y **API Gateway**.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+---
 
-To manually create a virtualenv on MacOS and Linux:
+## 📘 Descripción del Proyecto
 
-```
-$ python -m venv .venv
-```
+El sistema simula una **plataforma de reservas** que dispara eventos hacia otros microservicios especializados cuando se crea una nueva reserva.
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+Cada microservicio se implementa como una **función Lambda** independiente, escrita potencialmente en diferentes lenguajes (Python, TypeScript, Go, etc.), para demostrar interoperabilidad entre servicios.
 
-```
-$ source .venv/bin/activate
-```
+---
 
-If you are a Windows platform, you would activate the virtualenv like this:
+## 🧩 Arquitectura General
 
-```
-% .venv\Scripts\activate.bat
-```
+```mermaid
+config:
+  look: handDrawn
+  theme: neutral
+---
+flowchart LR
+    A["🟦 Servicio de Reservas (API Gateway + Lambda)"]
+    B["🟪 Event Broker (Amazon EventBridge)"]
+    C["🟩 Servicio de Notificaciones (Lambda)"]
+    D["🟩 Servicio de Facturación (Lambda)"]
+    E["🟩 Servicio de Analítica (Lambda)"]
 
-Once the virtualenv is activated, you can install the required dependencies.
+    EV1["📦 Publica evento: ReservaCreada"]
+    EV2["📦 Propaga evento: ReservaCreada"]
 
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
+    A --> EV1 --> B --> EV2 --> C
+    EV2 --> D
+    EV2 --> E
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+---
 
-## Useful commands
+## 🧱 Componentes Principales
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+| Componente | Descripción | Tecnología |
+|-------------|--------------|-------------|
+| **Servicio de Reservas** | Expone una API REST para crear reservas y publicar eventos `ReservaCreada`. | AWS Lambda + API Gateway |
+| **Event Broker** | Canal de eventos que enruta los mensajes entre servicios. | Amazon EventBridge |
+| **Servicio de Notificaciones** | Escucha eventos de reservas y envía notificaciones al usuario. | AWS Lambda |
+| **Servicio de Facturación** | Procesa pagos o genera facturas al recibir eventos de reservas. | AWS Lambda |
+| **Servicio de Analítica** | Registra métricas o estadísticas de uso. | AWS Lambda |
 
-Enjoy!
+---
+
+## ⚙️ Estructura de Carpetas
+
+```text
+cdk-app/
+├── .venv/                 # Entorno virtual Python
+├── cdk.out/               # Archivos generados por CDK
+├── reservaciones_app/     # Código de la app CDK (stacks, app.py)
+├── services/              # Código fuente de los microservicios
+│   ├── reservas/
+│   ├── notificaciones/
+│   ├── facturacion/
+│   ├── analitica/
+├── tests/                 # Pruebas unitarias
+├── .env                   # Variables de entorno
+├── .env.example           # Ejemplo de archivo de variables de entorno
+├── .gitignore
+├── app.py                 # Entrada principal del CDK
+├── cdk.json               # Configuración CDK
+├── README.md              # Este archivo
+├── requirements-dev.txt   # Dependencias de desarrollo
+├── requirements.txt       # Dependencias de producción
+└── source.bat             # Script de entorno (Windows)
+```
+
+---
+
+## 🚀 Despliegue con AWS CDK
+
+### 1️⃣ Crear entorno virtual
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux / Mac
+.venv\Scripts\activate.bat # Windows
+```
+
+### 2️⃣ Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Comandos útiles de CDK
+
+| Comando | Descripción |
+|----------|--------------|
+| `cdk ls` | Lista los stacks del proyecto |
+| `cdk synth` | Genera la plantilla de CloudFormation |
+| `cdk deploy` | Despliega los recursos en AWS |
+| `cdk diff` | Compara cambios entre la versión local y desplegada |
+| `cdk destroy` | Elimina los recursos del stack |
+
+---
+
+
+## 🧠 Conceptos Clave Aprendidos
+
+- Arquitecturas desacopladas mediante eventos.
+- AWS CDK en Python para IaC.
+- Lambdas multi-lenguaje.
+- Comunicación entre servicios con EventBridge.
+- Uso de API Gateway como punto de entrada.
+- Simulación de AWS con LocalStack.
+- Automatización con CloudFormation.
+- Añadir persistencia (DynamoDB).
+- Autenticación en API Gateway.
+- Analítica avanzada (Kinesis / Athena).
+- CI/CD para despliegue automatizado.
+
+---
+
+## 🧑‍💻 Autor
+
+**Oscar Vallecillo**
+Proyecto educativo de arquitectura basada en eventos.
+Tecnologías: AWS, CDK, Lambda, EventBridge, API Gateway, Python, Node.js.
+
+## 🧪 Pruebas Locales
+
+### 🔹 Ejecutar Lambdas localmente
+
+```bash
+# Desde el directorio del servicio
+python lambda_function.py
+```
+
+O usando **AWS SAM CLI**:
+
+```bash
+sam local invoke
+```
+
+### 🔹 Simular AWS Localmente con LocalStack
+
+LocalStack permite emular servicios de AWS como Lambda, API Gateway y EventBridge **sin costo**.
+
+#### Instalación
+
+```bash
+pip install localstack
+localstack --version
+```
+
+#### Levantar LocalStack
+
+```bash
+# Levanta todos los servicios simulados
+localstack start
+```
+
+O con Docker:
+
+```bash
+docker run --rm -it -p 4566:4566 -p 4571:4571 localstack/localstack
+```
+
+#### Configurar CDK para LocalStack
+
+```python
+import aws_cdk.aws_lambda as lambda_
+from aws_cdk import aws_apigateway as apigw, Stack, Environment
+
+class ApiStack(Stack):
+    def __init__(self, scope, id, **kwargs):
+        super().__init__(scope, id, **kwargs)
+
+        func = lambda_.Function(
+            self, "ReservasLambda",
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler="lambda_function.handler",
+            code=lambda_.Code.from_asset("services/reservas")
+        )
+
+        apigw.LambdaRestApi(self, "ReservasApi", handler=func)
+
+app = App()
+ApiStack(app, "ApiStack", env=Environment(
+    account="000000000000",  # Dummy para LocalStack
+    region="us-east-1"
+))
+```
+
+Invocar la API localmente con **curl**:
+
+```bash
+curl -X POST http://localhost:4566/restapis/<API_ID>/reservas
+```
+
+### 🔹 Ejecutar pruebas unitarias
+
+```bash
+cd tests/
+pytest
+```
+
+---
