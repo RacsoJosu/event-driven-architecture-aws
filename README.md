@@ -17,17 +17,23 @@ Cada microservicio se implementa como una **función Lambda** independiente, esc
 
 ## 🧩 Arquitectura General
 
+###
 ```mermaid
-config:
-  look: handDrawn
-  theme: neutral
----
+%%{init: {"theme":"neutral","flowchart":{"curve":"linear","useMaxWidth":true}}}%%
 flowchart LR
-    A["🟦 Servicio de Reservas (API Gateway + Lambda)"]
-    B["🟪 Event Broker (Amazon EventBridge)"]
-    C["🟩 Servicio de Notificaciones (Lambda)"]
-    D["🟩 Servicio de Facturación (Lambda)"]
-    E["🟩 Servicio de Analítica (Lambda)"]
+    style A fill:#6fa8dc,stroke:#333,stroke-width:2px
+    style B fill:#b4a7d6,stroke:#333,stroke-width:2px
+    style C fill:#93c47d,stroke:#333,stroke-width:2px
+    style D fill:#93c47d,stroke:#333,stroke-width:2px
+    style E fill:#93c47d,stroke:#333,stroke-width:2px
+    style EV1 fill:#ffe599,stroke:#333,stroke-width:2px
+    style EV2 fill:#ffe599,stroke:#333,stroke-width:2px
+
+    A["🟦 Servicio de Reservas\n(API Gateway + Lambda)"]
+    B["🟪 Event Broker\n(Amazon EventBridge)"]
+    C["🟩 Servicio de Notificaciones\n(Lambda)"]
+    D["🟩 Servicio de Facturación\n(Lambda)"]
+    E["🟩 Servicio de Analítica\n(Lambda)"]
 
     EV1["📦 Publica evento: ReservaCreada"]
     EV2["📦 Propaga evento: ReservaCreada"]
@@ -35,8 +41,9 @@ flowchart LR
     A --> EV1 --> B --> EV2 --> C
     EV2 --> D
     EV2 --> E
-```
 
+```
+###
 ---
 
 ## 🧱 Componentes Principales
